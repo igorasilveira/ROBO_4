@@ -25,6 +25,7 @@
   <depend>nodelet</depend>
   <depend>actionlib</depend>
   <depend>geometry_msgs</depend>
+  <depend>gmapping</depend>
 
   <exec_depend>stdr_server</exec_depend>
 

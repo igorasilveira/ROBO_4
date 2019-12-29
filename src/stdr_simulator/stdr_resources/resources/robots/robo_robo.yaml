@@ -11,11 +11,11 @@ robot:
         theta: 0
     - laser:
         laser_specifications:
-          max_angle: 2.09439516067505
-          min_angle: -2.09439516067505
+          max_angle: 3.1415926535
+          min_angle: -3.1415926537
           max_range: 4.09000015258789
           min_range: 0.0599999986588955
-          num_rays: 300
+          num_rays: 900
           frequency: 10
           frame_id: laser_0
           pose:

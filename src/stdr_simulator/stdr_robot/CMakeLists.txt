@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   sensor_msgs
   nav_msgs
+  gmapping
 )
 
 set(CMAKE_BUILD_TYPE Release)
@@ -35,6 +36,7 @@ catkin_package(
     geometry_msgs
     sensor_msgs
     nav_msgs
+    gmapping
 #  DEPENDS system_lib
 )
 

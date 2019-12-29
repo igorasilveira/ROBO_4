@@ -45,3 +45,16 @@ target_link_libraries(stdr_obstacle_avoidance
 install(TARGETS stdr_obstacle_avoidance
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+add_executable(robo_mapping
+  src/mapping/main.cpp
+  src/mapping/mapping.cpp)
+add_dependencies(robo_mapping ${stdr_msgs_EXPORTED_TARGETS}) # wait for stdr_msgs to be build
+target_link_libraries(robo_mapping
+  ${catkin_LIBRARIES}
+)
+
+# Install excecutables
+install(TARGETS robo_mapping
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

@@ -53,7 +53,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: true
       Name: Map
-      Topic: /map
+      Topic: /robot0/map
       Value: true
     - Class: rviz/TF
       Enabled: true

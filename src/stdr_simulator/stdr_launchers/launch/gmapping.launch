@@ -1,0 +1,8 @@
+<launch>
+	
+	
+	<node name="gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=/robot0/laser_0 _base_frame:='/robot0' map:=/robot0/map" output="screen">
+		<param name="_resolution" value="10"/>
+	</node>
+
+</launch>

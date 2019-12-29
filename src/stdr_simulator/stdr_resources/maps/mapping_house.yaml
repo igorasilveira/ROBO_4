@@ -1,6 +1,6 @@
 image: mapping_house.png
 resolution: 0.05
 origin: [0.0, 0.0, 0.0]
-occupied_thresh: 0.6
-free_thresh: 0.3
+occupied_thresh: 0.4
+free_thresh: 0.2
 negate: 0
