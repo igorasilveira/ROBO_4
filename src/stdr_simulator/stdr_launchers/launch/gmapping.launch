@@ -1,8 +1,48 @@
 <launch>
 	
-	
-	<node name="gmapping" pkg="gmapping" type="slam_gmapping" args="scan:=/robot0/laser_0 _base_frame:='/robot0' map:=/robot0/map" output="screen">
-		<param name="_resolution" value="10"/>
-	</node>
+	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+    <param name="base_frame" value="/robot0"/>
+    <param name="odom_frame" value="/robot0/odom"/>
+    <param name="map_update_interval" value="3.0"/>
+    <param name="maxUrange" value="6.0"/>
+    <param name="maxRange" value="8.0"/>
+    <param name="sigma" value="0.05"/>
+    <param name="kernelSize" value="1"/>
+    <param name="lstep" value="0.05"/>
+    <param name="astep" value="0.05"/>
+    <param name="iterations" value="5"/>
+    <param name="lsigma" value="0.075"/>
+    <param name="ogain" value="3.0"/>
+    <param name="lskip" value="0"/>
+    <param name="minimumScore" value="200"/>
+    <param name="srr" value="0.01"/>
+    <param name="srt" value="0.02"/>
+    <param name="str" value="0.01"/>
+    <param name="stt" value="0.02"/>
+    <param name="linearUpdate" value="0.5"/>
+    <param name="angularUpdate" value="0.436"/>
+    <param name="temporalUpdate" value="-1.0"/>
+    <param name="resampleThreshold" value="0.5"/>
+    <param name="particles" value="80"/>
+  <!--
+    <param name="xmin" value="-50.0"/>
+    <param name="ymin" value="-50.0"/>
+    <param name="xmax" value="50.0"/>
+    <param name="ymax" value="50.0"/>
+  make the starting size small for the benefit of the Android client's memory...
+  -->
+    <param name="xmin" value="400.0"/>
+    <param name="ymin" value="300.0"/>
+    <param name="xmax" value="400.0"/>
+    <param name="ymax" value="300.0"/>
+ 
+    <param name="delta" value="0.5"/>
+    <param name="llsamplerange" value="0.01"/>
+    <param name="llsamplestep" value="0.01"/>
+    <param name="lasamplerange" value="0.005"/>
+    <param name="lasamplestep" value="0.005"/>
+    <remap from="scan" to="/robot0/laser_0"/>
+    <remap from="map" to="/robot0/map"/>
+  </node>
 
 </launch>

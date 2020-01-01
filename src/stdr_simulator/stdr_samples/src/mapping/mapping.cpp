@@ -41,6 +41,8 @@ namespace stdr_samples
       exit(0);
     }
 
+    map_resolution_ = 0.5;
+
     robot_name_ = std::string(argv[1]);
 
     laser_topic_ = std::string("/") +
@@ -124,16 +126,24 @@ namespace stdr_samples
   {
     map_ = msg;
 
-//    ROS_INFO("size: %d", map_.data.size());
-//    ROS_INFO("resolution: %d", map_.info.resolution);
-//    ROS_INFO("position: %d, %d, %d", map_.info.origin.position.x, map_.info.origin.position.y, map_.info.origin.position.z);
+    int map_width = map_.info.width;
+    int map_height = map_.info.height;
     int loop;
 
-    for(loop = 0; loop < map_.data.size(); loop++) {
+
+    for(loop = map_.data.size() - 1; loop > 0; loop--) {
       if (map_.data.at(loop) != -1) {
-        //ROS_INFO("index: %d, value: %d ", loop, map_.data.at(loop));
+        int row = (int)(loop / map_width);
+        int column = loop - (row * map_width);
+        ROS_INFO("index: %d, value: %d ", loop, map_.data.at(loop));
+        ROS_INFO("row: %d, column: %d ", row, column);
+        ROS_INFO("height: %d", map_.info.height);
+        ROS_INFO("width: %d", map_.info.width);
+        return;
       }
     }
+    ROS_INFO("size: %d", map_.data.size());
+    ROS_INFO("value: %d", map_.data.at(2000500));
   }
 
   /**
@@ -153,8 +163,8 @@ namespace stdr_samples
     transform_info_.y = v.getY();
     transform_info_.rotation = yaw;
 
-    ROS_INFO("x: %f", transform_info_.x);
-    ROS_INFO("y: %f", transform_info_.y);
-    ROS_INFO("radians: %f", transform_info_.rotation);
+//    ROS_INFO("x: %f", transform_info_.x);
+//    ROS_INFO("y: %f", transform_info_.y);
+//    ROS_INFO("radians: %f", transform_info_.rotation);
   }
 }

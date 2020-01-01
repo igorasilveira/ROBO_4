@@ -4,11 +4,11 @@
 	
 	<node type="stdr_server_node" pkg="stdr_server" name="stdr_server" output="screen" args="$(find stdr_resources)/maps/mapping_house.yaml"/>
 
-	<node pkg="tf" type="static_transform_publisher" name="world2map" args="0 0 0 0 0 0  world map 100" />
+	<node pkg="tf" type="static_transform_publisher" name="world2map" args="0 0 0 0 0 0  world map 1" />
 	
 	<include file="$(find stdr_gui)/launch/stdr_gui.launch"/>
 	
-	<!-- <include file="$(find stdr_launchers)/launch/gmapping.launch"/>-->
+	<include file="$(find stdr_launchers)/launch/gmapping.launch"/>
 	
 	<node pkg="stdr_robot" type="robot_handler" name="$(anon robot_spawn)" args="add $(find stdr_resources)/resources/robots/robo_robo.yaml 2 2 0" />
 	

@@ -66,6 +66,8 @@ namespace stdr_samples
 
       tf::StampedTransform transform_;
 
+      float map_resolution_;
+
       //!< The robot frame id
       std::string robot_name_;
 
