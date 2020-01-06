@@ -32,20 +32,6 @@ catkin_package(
     nav_msgs
 )
 
-####################### Obstacle avoidance ##################################
-add_executable(stdr_obstacle_avoidance
-  src/obstacle_avoidance/main.cpp
-  src/obstacle_avoidance/obstacle_avoidance.cpp)
-add_dependencies(stdr_obstacle_avoidance ${stdr_msgs_EXPORTED_TARGETS}) # wait for stdr_msgs to be build
-target_link_libraries(stdr_obstacle_avoidance
-  ${catkin_LIBRARIES}
-)
-
-# Install excecutables
-install(TARGETS stdr_obstacle_avoidance
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
 add_executable(robo_mapping
   src/mapping/main.cpp
   src/mapping/mapping.cpp)

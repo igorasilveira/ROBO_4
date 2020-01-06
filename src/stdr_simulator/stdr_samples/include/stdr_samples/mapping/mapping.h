@@ -1,29 +1,10 @@
-/******************************************************************************
-   STDR Simulator - Simple Two DImensional Robot Simulator
-   Copyright (C) 2013 STDR Simulator
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
-   
-   Authors : 
-   * Manos Tsardoulias, etsardou@gmail.com
-   * Aris Thallas, aris.thallas@gmail.com
-   * Chris Zalidis, zalidis@gmail.com 
-******************************************************************************/
 #ifndef STDR_MAPPING_SAMPLE
 #define STDR_MAPPING_SAMPLE
 
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
+#include <vector>
 
 #include <tf/transform_listener.h>
 
@@ -54,19 +35,98 @@ namespace stdr_samples
     float rotation;
   };
 
+  struct Entrance {
+    float left_wall_x_;
+    float left_wall_y_;
+    float right_wall_x_;
+    float right_wall_y_;
+  };
+
+  struct Room {
+    Entrance entrance_;
+    float top_left_corner_x_;
+    float top_left_corner_y_;
+    float top_right_corner_x_;
+    float top_right_corner_y_;
+    float bottom_left_corner_x_;
+    float bottom_left_corner_y_;
+    float bottom_right_corner_x_;
+    float bottom_right_corner_y_;
+    float area;
+  };
+
+  enum RoomPosition {
+      ABOVE, BELLOW
+  };
+
+  enum MappingStates {
+    FIND_ROOM, GO_TO_ROOM, MAP_ROOM, EXIT_ROOM
+  };
+
+  enum FindRoomStates {
+    FIND_ENTRANCES,
+    MOVE_AROUND
+  };
+
+  enum RoomPositioningStates {
+    POSITIONING_ROTATION,
+    ALIGNMENT_MOVEMENT,
+    ENTRANCE_ROTATION,
+    ROOM_ENTER
+  };
+
+  enum MapRoomStates {
+    FIND_CORNER
+  };
   /**
-  @class ObstacleAvoidance
-  @brief Performs obstacle avoidance to a single robot
+  @class Mapping
+  @brief Performs mapping to a single robot
   **/ 
   class Mapping
   {
     private:
 
+      float MAX_ANGULAR_SPEED_;
+      float MAX_LINEAR_SPEED_;
+
+      bool has_set_initial_y_;
+
       tf::TransformListener transformListener_;
 
       tf::StampedTransform transform_;
 
-      float map_resolution_;
+      //!< The gmapping map resolution
+      float initial_y_;
+
+      //!< The gmapping map resolution
+      double map_resolution_;
+
+      //!< The already mapped rooms
+      std::vector<Room> mapped_rooms_;
+
+      //!< The already known entrances
+      std::vector<Entrance> mapped_entrances_;
+
+      //!< The current assigned entrance
+      Entrance current_entrance_;
+
+      //!< The current mapping room
+      Room current_room_;
+
+      //!< The current room position
+      RoomPosition current_room_position;
+
+      //!< The current major state
+      MappingStates current_state_;
+
+      //!< The current FindRoomStates state
+      FindRoomStates current_find_room_state;
+
+      //!< The current GoToRoomStates state
+      RoomPositioningStates current_room_positioning_state;
+
+      //!< The current MapRoomStates state
+      MapRoomStates current_map_room_state;
 
       //!< The robot frame id
       std::string robot_name_;
@@ -101,6 +161,8 @@ namespace stdr_samples
       //!< The twist publisher
       ros::Publisher cmd_vel_pub_;
       
+      float old_x_;
+
     public:
     
       /**
@@ -132,10 +194,94 @@ namespace stdr_samples
       void mapCallback(const nav_msgs::OccupancyGrid& msg);
 
       /**
+      @brief Gets the index of the occupancy grid data[]
+      @param x [const int] the x coordinate
+      @param y [const int] the y coordinate
+      @return int the index
+      **/
+      int getMapDataIndex(const float x, const float y);
+
+      /**
       @brief Updates the saved transform of the robot
       @return void
       **/
       void getTransform();
+
+      void findRoom();
+
+      void goToRoom();
+
+      void mapRoom();
+
+      void exitRoom();
+
+      /**
+      @brief Find y coordinate of vertical wall
+      @param const int direction to find, 1 is upwards
+      @return int the y coordinate
+      **/
+      int findVerticalWall(const int direction);
+
+      /**
+      @brief Finds the entrances along a wall
+      @param const int y coordinate of the wall
+      **/
+      void findWallEntrances(const int y);
+
+      /**
+      @brief Finds the entrances
+      **/
+      void findEntrances();
+
+      /**
+      @brief Selects one entrance that has not been used yet
+      @return True if found valid entrance
+      **/
+      bool selectEntrance();
+
+      /**
+      @brief Rotates towards a given degree
+      **/
+      bool rotateToDegree(float degree);
+
+      /**
+      @brief Rotates towards entrance middle point
+      **/
+      void rotateToEntrancePositioning();
+
+      /**
+      @brief Moves towards entrance middle point
+      **/
+      void moveToEntrancePositioning();
+
+      /**
+      @brief Rotates towards entrance middle point when bellow it
+      @param Whether it is an exit
+      **/
+      void rotateToEntrance(bool isExit);
+
+      /**
+      @brief Enters a room until at 2 meter of wall
+      **/
+      void enterRoom();
+
+      /**
+      @brief Exits a room until at initial y position
+      **/
+      void exitToHall();
+
+      /**
+      @brief Exits a room until at initial y position
+      @return True if all 4 corners were found
+      **/
+      bool findCorners();
+
+      /**
+      @brief Moves around to initialize
+      **/
+      void moveAround();
+
+      bool moveToX(float degree);
   };
 }
 

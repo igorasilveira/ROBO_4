@@ -10,7 +10,7 @@
 	
 	<include file="$(find stdr_launchers)/launch/gmapping.launch"/>
 	
-	<node pkg="stdr_robot" type="robot_handler" name="$(anon robot_spawn)" args="add $(find stdr_resources)/resources/robots/robo_robo.yaml 2 2 0" />
+	<node pkg="stdr_robot" type="robot_handler" name="$(anon robot_spawn)" args="add $(find stdr_resources)/resources/robots/robo_robo.yaml 3 8 0" />
 	
 	<!--<node name="movement" pkg="stdr_samples" type="robo_mapping" args="robot0 laser_0"/>-->
 	
