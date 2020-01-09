@@ -24,5 +24,5 @@ robot:
             theta: 0
           noise:
             noise_specifications:
-              noise_mean: 0.5
-              noise_std: 0.0500000007450581
+              noise_mean: 0.0
+              noise_std: 0.00

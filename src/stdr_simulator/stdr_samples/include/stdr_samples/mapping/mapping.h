@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
+#include <stdlib.h>
 
 #include <tf/transform_listener.h>
 
@@ -56,7 +57,7 @@ namespace stdr_samples
   };
 
   enum RoomPosition {
-      ABOVE, BELLOW
+      ABOVE, BELOW
   };
 
   enum MappingStates {
@@ -90,6 +91,9 @@ namespace stdr_samples
       float MAX_LINEAR_SPEED_;
 
       bool has_set_initial_y_;
+
+      bool found_all_rooms_;
+      bool has_set_biggest_;
 
       tf::TransformListener transformListener_;
 
@@ -280,6 +284,11 @@ namespace stdr_samples
       @brief Moves around to initialize
       **/
       void moveAround();
+
+      /**
+      @brief Sets the current room to be the largest
+      **/
+      void setLargestRoom();
 
       bool moveToX(float degree);
   };

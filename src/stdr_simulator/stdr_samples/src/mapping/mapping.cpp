@@ -45,16 +45,19 @@ namespace stdr_samples
 
     has_set_initial_y_= false;
 
+    found_all_rooms_ = false;
+    has_set_biggest_ = false;
+
     old_x_ = -1;
 
     MAX_ANGULAR_SPEED_ = .8;
-    MAX_LINEAR_SPEED_ = .3;
+    MAX_LINEAR_SPEED_ = 0.3;
 
     //!< The current major state
     current_state_ = FIND_ROOM;
 
     //!< The current FindRoomStates state
-    current_find_room_state = FIND_ENTRANCES;
+    current_find_room_state = MOVE_AROUND;
 
     //!< The current GoToRoomStates state
     current_room_positioning_state = POSITIONING_ROTATION;
@@ -62,7 +65,7 @@ namespace stdr_samples
     //!< The current MapRoomStates state
     current_map_room_state = FIND_CORNER;
 
-    current_room_position = BELLOW;
+    current_room_position = BELOW;
 
     map_resolution_ = 0.25;
 
@@ -119,22 +122,49 @@ namespace stdr_samples
       old_x_ = transform_info_.x;
     }
 
-    switch (current_state_) {
-      case FIND_ROOM:
-        findRoom();
-        break;
-      case GO_TO_ROOM:
-        goToRoom();
-        break;
-      case MAP_ROOM:
-        mapRoom();
-        break;
-      case EXIT_ROOM:
-        exitRoom();
-        break;
-      default:
-        break;
+    if (found_all_rooms_) {
+      if (!has_set_biggest_) {
+        has_set_biggest_ = true;
+        setLargestRoom();
+      }
+      goToRoom();
+    } else {
+
+      switch (current_state_) {
+        case FIND_ROOM:
+          findRoom();
+          break;
+        case GO_TO_ROOM:
+          goToRoom();
+          break;
+        case MAP_ROOM:
+          mapRoom();
+          break;
+        case EXIT_ROOM:
+          exitRoom();
+          break;
+        default:
+          break;
+      }
     }
+
+  }
+
+  /**
+  @brief Sets the current room to be the largest
+  **/
+  void Mapping::setLargestRoom() {
+    float maxArea = 0;
+    int maxRoom = 0;
+    for (int j = 0; j < mapped_rooms_.size(); ++j) {
+      if (mapped_rooms_.at(j).area > maxArea) {
+        maxArea = mapped_rooms_.at(j).area;
+        maxRoom = j;
+      }
+    }
+
+    current_room_ = mapped_rooms_.at(maxRoom);
+    current_entrance_ = current_room_.entrance_;
   }
 
   /**
@@ -166,10 +196,6 @@ namespace stdr_samples
     transform_info_.x = v.getX();
     transform_info_.y = v.getY();
     transform_info_.rotation = yaw;
-
-//    ROS_INFO("x: %f", transform_info_.x);
-//    ROS_INFO("y: %f", transform_info_.y);
-//    ROS_INFO("radians: %f", transform_info_.rotation);
   }
 
   /**
@@ -256,6 +282,7 @@ namespace stdr_samples
 
               if (entranceMapValue == 100 &&
                   startedEntrance &&
+                  map_.data.at(getMapDataIndex(entrance.left_wall_x_ + 1, y - 1) != 100) &&
                   abs(xLeft - 1 - entrance.left_wall_x_) <= 2 / map_resolution_) {
                 entranceXRight = xLeft - 1;
                 entrance.right_wall_x_ = entranceXRight;
@@ -294,34 +321,29 @@ namespace stdr_samples
       while (!moveToX(old_x_ + 1.0)) {
 
       }
+
       cmd.linear.x = 0;
       cmd_vel_pub_.publish(cmd);
-
       current_find_room_state = FIND_ENTRANCES;
     }
   }
 
   void Mapping::findRoom() {
     if (current_find_room_state == FIND_ENTRANCES) {
-      ROS_INFO("----------- LOOKING FOR  ENTRANCES");
       findEntrances();
 
       if (mapped_entrances_.size() > 0) {
         if (selectEntrance()) {
-          ROS_INFO("----------- FOUND ENTRACE");
           current_state_ = GO_TO_ROOM;
           current_room_positioning_state = POSITIONING_ROTATION;
           return;
         }
       }
 
-      ROS_INFO("++++++++++++++++++ NOT FOUND ENTRACE");
-
       current_find_room_state = MOVE_AROUND;
     }
 
     if (current_find_room_state == MOVE_AROUND) {
-      ROS_INFO("----------- MOVING AROUND");
       old_x_ = transform_info_.x;
       moveAround();
     }
@@ -350,11 +372,32 @@ namespace stdr_samples
     geometry_msgs::Twist cmd;
     getTransform();
 
-    cmd.linear.x = MAX_LINEAR_SPEED_ * 2 * fabs(x - transform_info_.x);
+    cmd.linear.x = MAX_LINEAR_SPEED_ * fabs(x - transform_info_.x);
     cmd_vel_pub_.publish(cmd);
 
     if (fabs(x - transform_info_.x) <= 0.1) {
       return true;
+    }
+
+    int searchX = (int)transform_info_.x / map_resolution_;
+    int searchY = (int)transform_info_.y / map_resolution_;
+    int counter = 0;
+
+    for (counter = 0; abs(counter) < (2.0 / map_resolution_);) {
+      if (map_.data.at(getMapDataIndex(searchX + counter, searchY)) > 40) {
+        ROS_INFO("searchX %d", searchX);
+        ROS_INFO("searchY %d", searchY);
+        ROS_INFO("counter %d", counter);
+        ROS_INFO("value %d", map_.data.at(getMapDataIndex(searchX + counter, searchY)));
+        if (!selectEntrance()) {
+          ROS_INFO("FOUND ALL ROOMS");
+          found_all_rooms_ = true;
+        }
+
+        return true;
+      }
+
+      counter += 1;
     }
 
     return false;
@@ -372,10 +415,8 @@ namespace stdr_samples
     float objectiveRotation = 0;
 
     if (middlePointX < transform_info_.x - 0.2) {
-      ROS_INFO("ROTATE TO LEFT");
       objectiveRotation = M_PI;
     } else if (middlePointX > transform_info_.x + 0.2) {
-      ROS_INFO("ROTATE TO RIGHT");
       objectiveRotation = 0;
     } else {
       current_room_positioning_state = ENTRANCE_ROTATION;
@@ -388,7 +429,7 @@ namespace stdr_samples
   }
 
   /**
-  @brief Rotates towards entrance middle point when bellow it
+  @brief Rotates towards entrance middle point when below it
   **/
   void Mapping::rotateToEntrance(bool isExit) {
     float middlePointX;
@@ -405,7 +446,7 @@ namespace stdr_samples
 
       if (current_entrance_.left_wall_y_ * map_resolution_ <= transform_info_.y) {
         objectiveRotation = -M_PI_2;
-        current_room_position = BELLOW;
+        current_room_position = BELOW;
       }
     }
 
@@ -429,7 +470,6 @@ namespace stdr_samples
     float maxPosition = middlePointX + 0.01;
 
     if (fabs(transform_info_.x - minPosition) <= (maxPosition - minPosition)) {
-      ROS_INFO("INSIDE LIMIT");
       cmd.linear.x = 0;
       cmd_vel_pub_.publish(cmd);
       current_room_positioning_state = ENTRANCE_ROTATION;
@@ -444,7 +484,6 @@ namespace stdr_samples
   @brief Enters a room until at 1 meter of wall
   **/
   void Mapping::enterRoom() {
-    ROS_INFO("ENTER ROOM");
     geometry_msgs::Twist cmd;
 
     int mapValue = -1, yIncrement, counter = 0;
@@ -458,8 +497,6 @@ namespace stdr_samples
 
     if (fabs(searchY * map_resolution_ - initial_y_) > 2) {
       for (counter = 0; abs(counter) < (distance / map_resolution_);) {
-        ROS_INFO("Y %d", searchY + counter);
-        ROS_INFO("DATA %d", map_.data.at(getMapDataIndex(searchX, searchY + counter)));
         if (map_.data.at(getMapDataIndex(searchX, searchY + counter)) == 100) {
           hasFound = true;
           break;
@@ -470,14 +507,19 @@ namespace stdr_samples
     }
 
     if (!hasFound) {
-      cmd.linear.x = MAX_LINEAR_SPEED_;
+      cmd.linear.x = MAX_LINEAR_SPEED_ / 2;
       cmd_vel_pub_.publish(cmd);
     } else {
       cmd.linear.x = 0;
       cmd_vel_pub_.publish(cmd);
 
-      current_room_positioning_state = POSITIONING_ROTATION;
-      current_state_ = MAP_ROOM;
+      if (!found_all_rooms_) {
+        current_room_positioning_state = POSITIONING_ROTATION;
+        current_state_ = MAP_ROOM;
+      } else {
+        ROS_INFO("SUCCESS");
+        exit(0);
+      }
     }
 
   }
