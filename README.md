@@ -1,11 +1,16 @@
 # ROBO_4
 
-By: Igor Silveira up201505172@fe.up.pt
+**By:** Igor Silveira up201505172@fe.up.pt
+
 Course: Robotics in MIEIC
+
 Faculty of Engineering of Porto
 
+
 **OS:** Ubuntu 16.04 LTS
+
 **ROS Distro:** Kinetic
+
 **Build Command:** catkin build -G"Eclipse CDT4 - Unix Makefiles"
 
 **Launch Files RUN FIRST**
