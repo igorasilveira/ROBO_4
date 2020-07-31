@@ -1,5 +1,7 @@
 # ROBO_4
 
+![mapping-experiment.png](https://github.com/igorasilveira/ROBO_4/mapping-experiment.png)
+
 This project was developed within the scope of a Robotics class.
 The resulting project enables a robot to map a building's rooms using SLAM and lastly moving to the center of the largest mapped room.
 
