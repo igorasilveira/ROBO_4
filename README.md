@@ -1,11 +1,15 @@
 # ROBO_4
 
+This project was developed within the scope of a Robotics class.
+The resulting project enables a robot to map a building's rooms using SLAM and lastly moving to the center of the largest mapped room.
+
 **By:** Igor Silveira up201505172@fe.up.pt
 
-Course: Robotics in MIEIC
+**Course:** Robotics in MIEIC
 
-Faculty of Engineering of Porto
+*Faculty of Engineering of Porto*
 
+## Requirements
 
 **OS:** Ubuntu 16.04 LTS
 
